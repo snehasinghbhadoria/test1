@@ -1,0 +1,45 @@
+# Define the pipeline workflow
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+# Specify the pipeline stages
+stages:
+  - build
+
+# Set global variables
+variables:
+  ENABLE_DEBUG: "false"
+  CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+# Configure caching to speed up builds
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .cache/pip
+
+# Define the job
+build_job:
+  stage: build
+  image: ubuntu:22.04
+  before_script:
+    - echo "Updating system and installing dependencies..."
+    - apt-get update && apt-get install -y python3 python3-pip python3-distutils python3-venv build-essential findutils
+    - chmod +x ranbal
+    - chmod +x megoxer
+    - python3 -m pip install --upgrade pip
+    - |
+      if [ -f requirements.txt ]; then
+        python3 -m pip install --quiet -r requirements.txt
+      else
+        python3 -m pip install --quiet telebot flask pymongo aiohttp python-telegram-bot
+      fi
+    - echo "Making Python scripts executable..."
+    - find . -type f -iname "*.py" -exec chmod +x {} \;
+  script:
+    - echo "Starting the main application..."
+    - python3 shubham.py
+  timeout: 1h
+  retry: 2
+  after_script:
+    - echo "Build job completed."
