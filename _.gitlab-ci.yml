@@ -39,7 +39,7 @@ build_job:
   script:
     - echo "Starting the main application..."
     - python3 shubham.py
-  timeout: 3h
+  timeout: 1h
   retry: 2
   after_script:
     - echo "Build job completed."
